@@ -1,86 +1,6 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-
-<meta charset="UTF-8">
-
-<title>Painel de Cobrança</title>
-
-<style>
-
-body{
-font-family: Arial;
-background:#f4f6f8;
-padding:40px;
-}
-
-h1{
-color:#075E54;
-}
-
-.painel{
-background:white;
-padding:20px;
-border-radius:10px;
-margin-bottom:30px;
-box-shadow:0 3px 10px rgba(0,0,0,0.1);
-}
-
-button{
-background:#25D366;
-border:none;
-padding:12px 20px;
-color:white;
-font-size:15px;
-cursor:pointer;
-border-radius:6px;
-margin-top:10px;
-}
-
-button:hover{
-opacity:0.9;
-}
-
-.card{
-
-background:white;
-padding:15px;
-margin:10px 0;
-border-radius:8px;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
-
-}
-
-</style>
-
-</head>
-
-<body>
-
-<h1>Painel de Cobrança WhatsApp</h1>
-
-<div class="painel">
-
-<b>Total de clientes:</b>
-<span id="totalClientes">0</span>
-
-<br><br>
-
-<b>Total em aberto:</b>
-R$ <span id="totalValor">0</span>
-
-<br><br>
-
-<button onclick="enviarTodos()">Enviar todos</button>
-
-</div>
-
-<div id="lista"></div>
-
 <script>
 
-var urlPlanilha = "COLE_AQUI_SEU_LINK_CSV";
+var urlPlanilha = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcDM7gyYFT_ZwH_Q1sIkUYbpdpm6-5LG5nydGdv74VcEKFaav7hbhEPzK28e-B6QVIeki6RSTAb6yF/pub?gid=1041235902&single=true&output=csv";
 
 var clientes = [];
 
@@ -89,6 +9,7 @@ fetch(urlPlanilha)
 .then(data => {
 
 var linhas = data.split("\n");
+
 linhas.shift();
 
 var total = 0;
@@ -99,13 +20,14 @@ var colunas = linha.split(",");
 
 var nome = colunas[0];
 var telefone = colunas[1];
-var valor = Number(colunas[2]);
+var valor = colunas[2];
+var enviar = colunas[3];
 
-if(nome){
+if(nome && enviar == "SIM"){
 
 clientes.push({nome,telefone,valor});
 
-total += valor;
+total += Number(valor);
 
 var mensagem = `Olá ${nome}, identificamos um valor em aberto de R$ ${valor}. Poderia verificar?`;
 
@@ -119,7 +41,6 @@ div.innerHTML = `
 <b>${nome}</b><br>
 Telefone: ${telefone}<br>
 Valor: R$ ${valor}<br>
-
 <button onclick="window.open('${link}','_blank')">Enviar WhatsApp</button>
 `;
 
@@ -134,26 +55,4 @@ document.getElementById("totalValor").innerText = total;
 
 })
 
-function enviarTodos(){
-
-clientes.forEach((cliente,i)=>{
-
-setTimeout(()=>{
-
-var mensagem = `Olá ${cliente.nome}, identificamos um valor em aberto de R$ ${cliente.valor}. Poderia verificar?`;
-
-var link = "https://wa.me/55"+cliente.telefone+"?text="+encodeURIComponent(mensagem);
-
-window.open(link,'_blank');
-
-}, i*900)
-
-})
-
-}
-
 </script>
-
-</body>
-
-</html>
