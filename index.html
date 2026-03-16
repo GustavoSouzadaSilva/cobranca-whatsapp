@@ -13,10 +13,6 @@ background:#f5f5f5;
 padding:40px;
 }
 
-h1{
-color:#0d5c55;
-}
-
 table{
 border-collapse:collapse;
 width:100%;
@@ -26,7 +22,6 @@ background:white;
 th,td{
 padding:10px;
 border:1px solid #ddd;
-text-align:left;
 }
 
 button{
@@ -34,12 +29,8 @@ background:#25D366;
 color:white;
 border:none;
 padding:8px 12px;
-cursor:pointer;
 border-radius:5px;
-}
-
-button:hover{
-background:#1ebe5d;
+cursor:pointer;
 }
 
 </style>
@@ -48,7 +39,7 @@ background:#1ebe5d;
 
 <body>
 
-<h1>Painel de Cobrança WhatsApp</h1>
+<h1>Painel de Cobrança</h1>
 
 <table id="tabela">
 
@@ -61,8 +52,7 @@ background:#1ebe5d;
 </tr>
 </thead>
 
-<tbody>
-</tbody>
+<tbody></tbody>
 
 </table>
 
@@ -79,12 +69,14 @@ let tabela = document.querySelector("#tabela tbody");
 
 linhas.slice(1).forEach(linha => {
 
-let colunas = linha.split(",");
+let partes = linha.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
 
-let nome = colunas[0];
-let telefone = colunas[1];
-let valor = colunas[2];
-let enviar = colunas[3];
+if(!partes) return;
+
+let nome = partes[0];
+let telefone = partes[1];
+let valor = partes[2].replace(/"/g,"");
+let enviar = partes[3];
 
 if(enviar && enviar.trim().toUpperCase()=="SIM"){
 
@@ -97,7 +89,7 @@ let tr = document.createElement("tr");
 tr.innerHTML = `
 <td>${nome}</td>
 <td>${telefone}</td>
-<td>R$ ${valor}</td>
+<td>${valor}</td>
 <td><button onclick="window.open('${link}')">Enviar</button></td>
 `;
 
@@ -112,5 +104,4 @@ tabela.appendChild(tr);
 </script>
 
 </body>
-
 </html>
