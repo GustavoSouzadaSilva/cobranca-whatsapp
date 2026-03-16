@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Sistema de Cobrança WhatsApp</title>
+
+<style>
+
+body{
+font-family: Arial;
+background:#f4f6f8;
+padding:40px;
+}
+
+h1{
+color:#075E54;
+}
+
+button{
+background:#25D366;
+border:none;
+padding:12px 20px;
+color:white;
+font-size:16px;
+cursor:pointer;
+border-radius:5px;
+margin:5px;
+}
+
+.card{
+background:white;
+padding:15px;
+margin:10px 0;
+border-radius:8px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Sistema de Cobrança WhatsApp</h1>
+
+<div id="lista"></div>
+
+<script>
+
+var urlPlanilha = "COLE_AQUI_SEU_LINK_DA_PLANILHA";
+
+fetch(urlPlanilha)
+.then(res => res.text())
+.then(data => {
+
+var linhas = data.split("\n");
+linhas.shift();
+
+linhas.forEach(linha=>{
+
+var colunas = linha.split(",");
+
+var nome = colunas[0];
+var telefone = colunas[1];
+var valor = colunas[2];
+var mensagem = colunas[3];
+var link = colunas[4];
+
+if(nome){
+
+var div = document.createElement("div");
+div.className="card";
+
+div.innerHTML = `
+<b>${nome}</b><br>
+Valor: R$ ${valor}<br><br>
+<button onclick="window.open('${link}','_blank')">Enviar WhatsApp</button>
+`;
+
+document.getElementById("lista").appendChild(div);
+
+}
+
+})
+
+})
+
+</script>
+
+</body>
+
+</html>
