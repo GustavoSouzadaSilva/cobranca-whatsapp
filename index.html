@@ -1,72 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>Painel de Cobrança</title>
+
+<style>
+
+body{
+font-family: Arial;
+background:#f4f6f8;
+padding:40px;
+}
+
+h1{
+color:#075E54;
+}
+
+.painel{
+background:white;
+padding:20px;
+border-radius:10px;
+margin-bottom:20px;
+box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+.card{
+background:white;
+padding:15px;
+margin:10px 0;
+border-radius:8px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+button{
+background:#25D366;
+border:none;
+padding:10px 15px;
+color:white;
+border-radius:6px;
+cursor:pointer;
+margin-top:8px;
+}
+
+button:hover{
+opacity:0.9;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Painel de Cobrança WhatsApp</h1>
+
+<div class="painel">
+
+Clientes para cobrança:
+<b id="totalClientes">0</b>
+
+<br><br>
+
+Total em aberto:
+<b>R$ <span id="totalValor">0</span></b>
+
+<br><br>
+
+<button onclick="enviarTodos()">Enviar todos</button>
+
+</div>
+
+<div id="lista"></div>
+
 <script>
 
 var urlPlanilha = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcDM7gyYFT_ZwH_Q1sIkUYbpdpm6-5LG5nydGdv74VcEKFaav7hbhEPzK28e-B6QVIeki6RSTAb6yF/pub?output=csv";
 
 var clientes = [];
 
-fetch(urlPlanilha)
-.then(res => res.text())
-.then(data => {
+async function carregar(){
 
-var linhas = data.split("\n");
+try{
+
+let resposta = await fetch(urlPlanilha);
+let texto = await resposta.text();
+
+let linhas = texto.split("\n");
 
 linhas.shift();
 
-var total = 0;
+let total = 0;
 
 linhas.forEach(linha=>{
 
-var colunas = linha.split(",");
+let colunas = linha.split(",");
 
-var nome = colunas[0];
-var telefone = colunas[1];
-var valor = colunas[2];
-var enviar = colunas[3];
+let nome = colunas[0];
+let telefone = colunas[1];
+let valor = colunas[2];
+let enviar = colunas[3];
 
-if(nome && enviar == "SIM"){
+if(!nome) return;
+
+if(enviar && enviar.trim().toUpperCase() == "SIM"){
+
+telefone = telefone.replace(/\D/g,'');
+
+valor = parseFloat(valor) || 0;
 
 clientes.push({nome,telefone,valor});
 
-total += Number(valor);
+total += valor;
 
-var mensagem = `Olá ${nome}, identificamos um valor em aberto de R$ ${valor}. Poderia verificar?`;
+let mensagem = `Olá ${nome}, identificamos um valor em aberto de R$ ${valor}. Poderia verificar?`;
 
-var link = "https://wa.me/55"+telefone+"?text="+encodeURIComponent(mensagem);
+let link = "https://wa.me/55"+telefone+"?text="+encodeURIComponent(mensagem);
 
-var div = document.createElement("div");
+let card = document.createElement("div");
 
-div.className="card";
+card.className="card";
 
-div.innerHTML = `
+card.innerHTML = `
 <b>${nome}</b><br>
 Telefone: ${telefone}<br>
 Valor: R$ ${valor}<br>
 <button onclick="window.open('${link}','_blank')">Enviar WhatsApp</button>
 `;
 
-document.getElementById("lista").appendChild(div);
+document.getElementById("lista").appendChild(card);
 
 }
 
-})
+});
 
 document.getElementById("totalClientes").innerText = clientes.length;
 document.getElementById("totalValor").innerText = total;
 
-})
+}catch(erro){
+
+console.log("Erro ao carregar planilha:",erro);
+
+}
+
+}
+
+function enviarTodos(){
+
+clientes.forEach((cliente,i)=>{
+
+setTimeout(()=>{
+
+let mensagem = `Olá ${cliente.nome}, identificamos um valor em aberto de R$ ${cliente.valor}. Poderia verificar?`;
+
+let link = "https://wa.me/55"+cliente.telefone+"?text="+encodeURIComponent(mensagem);
+
+window.open(link,"_blank");
+
+}, i*800);
+
+});
+
+}
+
+carregar();
 
 </script>
 
-<h1>Painel de Cobrança WhatsApp</h1>
+</body>
 
-<div class="painel">
-
-<b>Total de clientes:</b>
-<span id="totalClientes">0</span>
-
-<br><br>
-
-<b>Total em aberto:</b>
-R$ <span id="totalValor">0</span>
-
-</div>
+</html>
