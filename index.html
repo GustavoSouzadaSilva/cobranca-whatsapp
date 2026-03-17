@@ -1,18 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>Painel de Cobrança WhatsApp</title>
+
+<style>
+
+body{
+font-family: Arial;
+background:#f5f5f5;
+padding:40px;
+}
+
+h1{
+color:#0d5c55;
+}
+
+table{
+border-collapse:collapse;
+width:100%;
+background:white;
+}
+
+th,td{
+padding:10px;
+border:1px solid #ddd;
+}
+
+a{
+background:#25D366;
+color:white;
+padding:8px 12px;
+border-radius:5px;
+text-decoration:none;
+display:inline-block;
+}
+
+a:hover{
+background:#1ebe5d;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Painel de Cobrança</h1>
+
+<table>
+<thead>
+<tr>
+<th>Nome</th>
+<th>Telefone</th>
+<th>Valor</th>
+<th>Ação</th>
+</tr>
+</thead>
+
+<tbody id="corpoTabela"></tbody>
+</table>
+
 <script>
+
+window.onload = function(){
 
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcDM7gyYFT_ZwH_Q1sIkUYbpdpm6-5LG5nydGdv74VcEKFaav7hbhEPzK28e-B6QVIeki6RSTAb6yF/pub?gid=1041235902&single=true&output=csv";
 
-// 🔴 COLE AQUI SEU LINK DO APPS SCRIPT
+// 🔴 COLE SEU LINK DO APPS SCRIPT AQUI
 const urlScript = "https://script.google.com/macros/s/AKfycbzhC-8PKaSEYW2ePh3iNVN9_kEFzvA6ahwUVE5ParUjn-XWbE0N1XFPo8TvcJBdzypO/exec";
+
+let tabela = document.getElementById("corpoTabela");
+
+if(!tabela){
+console.error("Tabela não encontrada");
+return;
+}
 
 fetch(urlCSV)
 .then(response => response.text())
 .then(data => {
 
 let linhas = data.split("\n");
-let tabela = document.querySelector("#tabela tbody");
 
-// 👇 AGORA COM INDEX (IMPORTANTE)
 linhas.slice(1).forEach((linha,index) => {
 
 let partes = linha.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
@@ -24,7 +96,6 @@ let telefone = partes[1];
 let valor = partes[2].replace(/"/g,"");
 let enviar = partes[3];
 
-// 👇 LINHA REAL NA PLANILHA
 let numeroLinha = index + 2;
 
 if(enviar && enviar.trim().toUpperCase()=="SIM"){
@@ -33,7 +104,7 @@ let mensagem = `Olá ${nome}, identificamos um valor em aberto de *R$ ${valor}*,
 *Por favor, como podemos regularizar?* 
 
 Segue a chave Pix para pagamento:
-CNPJ: 04.244.373/0002-40 `;
+CNPJ: 04.244.373/0002-40`;
 
 let link = `https://wa.me/55${telefone}?text=${encodeURIComponent(mensagem)}`;
 
@@ -57,15 +128,24 @@ tabela.appendChild(tr);
 
 });
 
-});
+})
+.catch(error => console.error("Erro ao carregar CSV:", error));
 
-// 🚀 FUNÇÃO QUE GRAVA NA PLANILHA
+}
+
+// 🚀 FUNÇÃO QUE ATUALIZA A PLANILHA
 function registrarCobranca(linha){
 
+const urlScript = "COLE_AQUI_SEU_LINK_DO_APPS_SCRIPT";
+
 fetch(urlScript + "?linha=" + linha)
-.then(() => console.log("Registrado na planilha"))
+.then(() => console.log("Cobrança registrada"))
 .catch(() => console.log("Erro ao registrar"));
 
 }
 
 </script>
+
+</body>
+
+</html>
