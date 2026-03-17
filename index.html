@@ -1,64 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-
-<meta charset="UTF-8">
-<title>Painel de Cobrança WhatsApp</title>
-
-<style>
-
-body{
-font-family: Arial;
-background:#f5f5f5;
-padding:40px;
-}
-
-table{
-border-collapse:collapse;
-width:100%;
-background:white;
-}
-
-th,td{
-padding:10px;
-border:1px solid #ddd;
-}
-
-button{
-background:#25D366;
-color:white;
-border:none;
-padding:8px 12px;
-border-radius:5px;
-cursor:pointer;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<h1>Painel de Cobrança</h1>
-
-<table id="tabela">
-
-<thead>
-<tr>
-<th>Nome</th>
-<th>Telefone</th>
-<th>Valor</th>
-<th>Ação</th>
-</tr>
-</thead>
-
-<tbody></tbody>
-
-</table>
-
 <script>
 
 const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcDM7gyYFT_ZwH_Q1sIkUYbpdpm6-5LG5nydGdv74VcEKFaav7hbhEPzK28e-B6QVIeki6RSTAb6yF/pub?gid=1041235902&single=true&output=csv";
+
+// 🔴 COLE AQUI SEU LINK DO APPS SCRIPT
+const urlScript = "https://script.google.com/macros/s/AKfycbzhC-8PKaSEYW2ePh3iNVN9_kEFzvA6ahwUVE5ParUjn-XWbE0N1XFPo8TvcJBdzypO/exec";
 
 fetch(urlCSV)
 .then(response => response.text())
@@ -67,7 +12,8 @@ fetch(urlCSV)
 let linhas = data.split("\n");
 let tabela = document.querySelector("#tabela tbody");
 
-linhas.slice(1).forEach(linha => {
+// 👇 AGORA COM INDEX (IMPORTANTE)
+linhas.slice(1).forEach((linha,index) => {
 
 let partes = linha.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
 
@@ -77,6 +23,9 @@ let nome = partes[0];
 let telefone = partes[1];
 let valor = partes[2].replace(/"/g,"");
 let enviar = partes[3];
+
+// 👇 LINHA REAL NA PLANILHA
+let numeroLinha = index + 2;
 
 if(enviar && enviar.trim().toUpperCase()=="SIM"){
 
@@ -94,7 +43,12 @@ tr.innerHTML = `
 <td>${nome}</td>
 <td>${telefone}</td>
 <td>${valor}</td>
-<td><a href="${link}" target="_blank">Enviar</a></td>
+<td>
+<a href="${link}" target="_blank"
+onclick="registrarCobranca(${numeroLinha})">
+Enviar
+</a>
+</td>
 `;
 
 tabela.appendChild(tr);
@@ -105,7 +59,13 @@ tabela.appendChild(tr);
 
 });
 
-</script>
+// 🚀 FUNÇÃO QUE GRAVA NA PLANILHA
+function registrarCobranca(linha){
 
-</body>
-</html>
+fetch(urlScript + "?linha=" + linha)
+.then(() => console.log("Registrado na planilha"))
+.catch(() => console.log("Erro ao registrar"));
+
+}
+
+</script>
